@@ -1,4 +1,4 @@
-name: Deploy GPS Tracker
+name: Build GPS Tracker
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,43 +22,37 @@ jobs:
       run: |
         cargo build --release
 
-    - name: Create Deploy Package
+    - name: Create Release Package
       run: |
-        mkdir -p deploy
-        cp target/release/device-location-tracker deploy/
-        cp -r static deploy/
+        mkdir -p gps-tracker-release
+        cp target/release/device-location-tracker gps-tracker-release/
+        cp -r static gps-tracker-release/
+        cp *.md gps-tracker-release/ || true
+        cp *.ps1 gps-tracker-release/ || true
+        tar -czf gps-tracker-linux-x64.tar.gz -C gps-tracker-release .
 
-    - name: Deploy to Server (SSH)
-      uses: appleboy/ssh-action@master
+    - name: Upload Release Artifact
+      uses: actions/upload-artifact@v3
       with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd /var/www/gps.avila.inc
-          systemctl stop gps-tracker
-          rm -rf old_backup
-          mv current old_backup || true
-          mkdir -p current
+        name: gps-tracker-linux-x64
+        path: gps-tracker-linux-x64.tar.gz
+        retention-days: 90
 
-    - name: Copy Files to Server
-      uses: appleboy/scp-action@master
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      if: github.ref == 'refs/heads/main'
       with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "deploy/*"
-        target: "/var/www/gps.avila.inc/current"
-        strip_components: 1
-
-    - name: Restart Service
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd /var/www/gps.avila.inc/current
-          chmod +x device-location-tracker
-          systemctl start gps-tracker
-          systemctl status gps-tracker
+        tag_name: v${{ github.run_number }}
+        name: GPS Tracker v${{ github.run_number }}
+        body: |
+          🚀 Build automático do GPS Tracker
+          
+          **Como usar:**
+          1. Baixe o arquivo `gps-tracker-linux-x64.tar.gz`
+          2. Extraia: `tar -xzf gps-tracker-linux-x64.tar.gz`
+          3. Execute: `chmod +x device-location-tracker && ./device-location-tracker`
+          
+          Build: ${{ github.sha }}
+        files: gps-tracker-linux-x64.tar.gz
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
