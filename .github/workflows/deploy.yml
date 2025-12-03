@@ -8,26 +8,37 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+      with:
+        path: GPS
+
+    - name: Checkout Arxis Dependencies
+      uses: actions/checkout@v3
+      with:
+        repository: avilaops/Portugal
+        path: Portugal
+        token: ${{ secrets.GH_PAT }}
+
     - name: Setup Rust
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
         override: true
-    
+
     - name: Build Release
+      working-directory: GPS
       run: |
         cargo build --release
-        
+
     - name: Create Deploy Package
+      working-directory: GPS
       run: |
         mkdir -p deploy
         cp target/release/device-location-tracker deploy/
         cp -r static deploy/
-        
+
     - name: Deploy to Server (SSH)
       uses: appleboy/ssh-action@master
       with:
@@ -40,17 +51,17 @@ jobs:
           rm -rf old_backup
           mv current old_backup || true
           mkdir -p current
-          
+
     - name: Copy Files to Server
       uses: appleboy/scp-action@master
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "deploy/*"
+        source: "GPS/deploy/*"
         target: "/var/www/gps.avila.inc/current"
-        strip_components: 1
-        
+        strip_components: 2
+
     - name: Restart Service
       uses: appleboy/ssh-action@master
       with:
