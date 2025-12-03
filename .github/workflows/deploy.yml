@@ -11,15 +11,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        path: GPS
-
-    - name: Checkout Arxis Dependencies
-      uses: actions/checkout@v3
-      with:
-        repository: avilaops/Portugal
-        path: Portugal
-        token: ${{ secrets.GH_PAT }}
 
     - name: Setup Rust
       uses: actions-rs/toolchain@v1
@@ -28,12 +19,10 @@ jobs:
         override: true
 
     - name: Build Release
-      working-directory: GPS
       run: |
         cargo build --release
 
     - name: Create Deploy Package
-      working-directory: GPS
       run: |
         mkdir -p deploy
         cp target/release/device-location-tracker deploy/
@@ -58,9 +47,9 @@ jobs:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "GPS/deploy/*"
+        source: "deploy/*"
         target: "/var/www/gps.avila.inc/current"
-        strip_components: 2
+        strip_components: 1
 
     - name: Restart Service
       uses: appleboy/ssh-action@master

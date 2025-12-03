@@ -61,28 +61,28 @@ scp -r "$deployDir\*" "${ServerUser}@${ServerHost}:${deployPath}/current/"
 Write-Host "⚙️  Configurando servidor..." -ForegroundColor Yellow
 ssh "${ServerUser}@${ServerHost}" @"
     cd ${deployPath}/current
-    
+
     # Permissões
     chmod +x device-location-tracker
     chown -R www-data:www-data ${deployPath}/current
-    
+
     # Logs
     mkdir -p /var/log/gps-tracker
     chown www-data:www-data /var/log/gps-tracker
-    
+
     # Systemd
     cp systemd-service.conf /etc/systemd/system/gps-tracker.service
     systemctl daemon-reload
-    
+
     # Nginx
     cp nginx.conf /etc/nginx/sites-available/gps.avila.inc
     ln -sf /etc/nginx/sites-available/gps.avila.inc /etc/nginx/sites-enabled/
     nginx -t && systemctl reload nginx
-    
+
     # Iniciar
     systemctl enable gps-tracker
     systemctl restart gps-tracker
-    
+
     echo ''
     echo '✅ Deploy concluído!'
     systemctl status gps-tracker

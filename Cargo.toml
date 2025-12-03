@@ -8,8 +8,8 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 # Using Arxis ecosystem native crates - ZERO external dependencies! 🚀
-avila-json = { path = "../Portugal/04-Projeto-Arxis/avila-json" }
-avila-geo = { path = "../Portugal/04-Projeto-Arxis/avila-geo" }
+avila-json = { path = "crates/avila-json" }
+avila-geo = { path = "crates/avila-geo" }
 
 [profile.release]
 opt-level = 3

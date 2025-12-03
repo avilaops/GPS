@@ -150,11 +150,11 @@ Get-Service DeviceLocationTracker
 
 ## 🔒 Segurança (Produção)
 
-✅ HTTPS obrigatório  
-✅ CORS configurado  
-✅ Headers de segurança  
-✅ Firewall configurado  
-✅ SSL/TLS com Let's Encrypt  
+✅ HTTPS obrigatório
+✅ CORS configurado
+✅ Headers de segurança
+✅ Firewall configurado
+✅ SSL/TLS com Let's Encrypt
 
 ## 📝 Scripts Disponíveis
 
@@ -191,5 +191,5 @@ MIT OR Apache-2.0
 
 ---
 
-**Desenvolvido com 🦀 Rust + Ecossistema Arxis/Avila**  
+**Desenvolvido com 🦀 Rust + Ecossistema Arxis/Avila**
 **Zero dependências externas | 100% código nativo brasileiro**
